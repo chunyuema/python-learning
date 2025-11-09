@@ -1,4 +1,5 @@
 from enum import Enum
+import uuid
 
 
 class Condition(Enum):
@@ -13,17 +14,25 @@ class MethodNotAllowed(Exception):
 
 
 class Bike(object):
+    
+    num_wheels = 2  # Class attribute
+    num_bikes = 0  # Class attribute to track number of bikes sold
+    
     def __init__(self, description, condition, sale_price, cost=0):
         self.description = description
         self.condition = condition
         self.sale_price = sale_price
         self.cost = cost
         self.sold = False
+        self.bike_id = uuid.uuid4()
+        Bike.num_bikes += 1
 
     # Destructor: Called when an object is about to be destroyed
     # Note: this does not release memory, Python's garbage collector handles that
     def __del__(self):
-        print(f'Deleting bike: {self.description}')
+        print(f'Deleting bike: {str(self.bike_id)[:5]}, {self.description}')
+        Bike.num_bikes -= 1
+        print(f'Bikes remaining: {Bike.num_bikes}')
 
     def update_sale_price(self, sale_price):
         if self.sold:
@@ -57,10 +66,23 @@ class Bike(object):
         print('__str__ called')
         return self.description
 
-
+class Triccycle(Bike):
+    num_wheels = 3  # Override class attribute for tricycles
+    
 if __name__ == '__main__':
+    from pprint import pprint
+    print("====== Checking the Bikes Class: ======")
+    pprint(Bike.__dict__)
+    print("====== Checking the Tricycle Class: ======")
+    pprint(Triccycle.__dict__)
+
+    
     bike = Bike('Univega Alpina, orange', Condition.OKAY, sale_price=500, cost=100)
     bike2 = Bike('Univega Alpina, orange', Condition.OKAY, sale_price=500, cost=100)
+    triccyle = Triccycle('Fisher Price, red', Condition.GOOD, sale_price=50, cost=10)
+    
+    print("Total bikes:", Bike.num_bikes)
+    print("Same access as Bikes:", Triccycle.num_bikes)
     
     print("====== Equality comparison: ======")
     print(bike == bike2)  # False, default is identity comparison)
@@ -81,3 +103,6 @@ if __name__ == '__main__':
     Bike('Raleigh Talus 2', Condition.BAD, sale_price=20)  # __init__ and __del__ called
     print("\n")
     
+    print("====== Class attribute access: ======")
+    print(f'Number of wheels: {Bike.num_wheels}')
+    print(f'Number of wheels (instance): {bike2.num_wheels}')
